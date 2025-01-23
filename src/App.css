@@ -29,9 +29,9 @@ body {
   background-color: rgba(255, 255, 255, 0.9);
 }
 
-.calculator-grid > button:focus {
+/* .calculator-grid > button:focus {
   background-color: rgba(255, 255, 255, 0.9);
-}
+} */
 
 .span-two {
   grid-column: span 2;
