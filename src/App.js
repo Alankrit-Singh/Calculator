@@ -14,10 +14,17 @@ export const ACTIONS = {
 function reducer(state, { type, payload }) {
   switch (type) {
     case ACTIONS.ADD_DIGIT:
+      if (state.overwrite) {
+        return {
+          ...state,
+          current: payload.digit,
+          overwrite: false,
+        };
+      }
       if (payload.digit === "." && state.current == null) {
         return {
-          current: "0."
-        }
+          current: "0.",
+        };
       }
       if (payload.digit === "0" && state.current === "0") {
         return state;
@@ -31,23 +38,83 @@ function reducer(state, { type, payload }) {
       };
 
     case ACTIONS.CHOOSE_OPERATION:
-      if (state.current == null && state.previous == null ) {
+      if (state.current == null && state.previous == null) {
+        return state;
+      }
+
+      if (state.current == null) {
+        return {
+          ...state,
+          operation: payload.operation,
+        };
+      }
+
+      if (state.previous == null) {
+        return {
+          ...state,
+          operation: payload.operation,
+          previous: state.current,
+          current: null,
+        };
+      }
+
+      return {
+        ...state,
+        previous: evaluate(state),
+        operation: payload.operation,
+        current: null,
+      };
+
+    case ACTIONS.CLEAR:
+      return {};
+
+    case ACTIONS.DELETE:
+      return {};
+
+    case ACTIONS.EVALUATE:
+      if (
+        state.previous == null ||
+        state.current == null ||
+        state.operation == null
+      ) {
         return state;
       }
       return {
         ...state,
-        current: `${state.current || ""}${payload.operation}`,
+        overwrite: true,
+        previous: null,
+        operation: null,
+        current: evaluate(state),
       };
-    
-    case ACTIONS.CLEAR:
-      return {}
-    
-    case ACTIONS.DELETE:
-      return {}
+  }
+}
 
-    case ACTIONS.EVALUATE:
-      return {}
-    }
+function evaluate({ current, previous, operation }) {
+  const prev = parseFloat(previous);
+  const curr = parseFloat(current);
+
+  if (isNaN(prev) || isNaN(curr)) return "";
+
+  let computation = "";
+
+  switch (operation) {
+    case "+":
+      computation = prev + curr;
+      break;
+    case "-":
+      computation = prev - curr;
+      break;
+    case "*":
+      computation = prev * curr;
+      break;
+    case "/":
+      computation = prev / curr;
+      break;
+    default:
+      return "";
+  }
+
+  return computation.toString();
 }
 
 function App() {
@@ -59,9 +126,14 @@ function App() {
         <div className="previous">
           {previous} {operation}
         </div>
-        <div className="current" >{current}</div>
+        <div className="current">{current}</div>
       </div>
-      <button className="span-two" onClick={() => dispatch({type: ACTIONS.CLEAR})}>AC</button>
+      <button
+        className="span-two"
+        onClick={() => dispatch({ type: ACTIONS.CLEAR })}
+      >
+        AC
+      </button>
       <button>DEL</button>
       <OperationButton operation="÷" dispatch={dispatch} />
       <DigitButton digit="1" dispatch={dispatch} />
@@ -78,7 +150,12 @@ function App() {
       <OperationButton operation="-" dispatch={dispatch} />
       <DigitButton digit="0" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
-      <button className="span-two">=</button>
+      <button
+        className="span-two"
+        onClick={() => dispatch({ type: ACTIONS.EVALUATE })}
+      >
+        =
+      </button>
     </div>
   );
 }
