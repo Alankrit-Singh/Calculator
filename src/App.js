@@ -42,19 +42,19 @@ function reducer(state, { type, payload }) {
         return state;
       }
 
-      if (state.current == null) {
-        return {
-          ...state,
-          operation: payload.operation,
-        };
-      }
-
       if (state.previous == null) {
         return {
           ...state,
           operation: payload.operation,
           previous: state.current,
           current: null,
+        };
+      }
+
+      if (state.current == null) {
+        return {
+          ...state,
+          operation: payload.operation,
         };
       }
 
@@ -104,10 +104,10 @@ function evaluate({ current, previous, operation }) {
     case "-":
       computation = prev - curr;
       break;
-    case "*":
+    case "x":
       computation = prev * curr;
       break;
-    case "/":
+    case "÷":
       computation = prev / curr;
       break;
     default:
