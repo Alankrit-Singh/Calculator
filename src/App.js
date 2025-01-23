@@ -69,7 +69,29 @@ function reducer(state, { type, payload }) {
       return {};
 
     case ACTIONS.DELETE:
-      return {};
+      if (state.overwrite) {
+        return {
+          ...state,
+          overwrite: false,
+          current: null,
+        };
+      }
+
+      if (state.current == null) {
+        return state;
+      }
+
+      if (state.current.length === 1) {
+        return {
+          ...state,
+          current: null,
+        };
+      }
+
+      return {
+        ...state,
+        current: state.current.slice(0, -1),
+      };
 
     case ACTIONS.EVALUATE:
       if (
@@ -134,7 +156,7 @@ function App() {
       >
         AC
       </button>
-      <button>DEL</button>
+      <button onClick={() => dispatch({ type: ACTIONS.DELETE })}>DEL</button>
       <OperationButton operation="÷" dispatch={dispatch} />
       <DigitButton digit="1" dispatch={dispatch} />
       <DigitButton digit="2" dispatch={dispatch} />
